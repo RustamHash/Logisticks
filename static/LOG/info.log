@@ -1,0 +1,6 @@
+INFO_2025-03-27 05:28:53,979_Watching for file changes with StatReloader
+INFO_2025-03-27 05:28:56,546_"GET / HTTP/1.1" 200 1741
+INFO_2025-03-27 05:28:56,892_"GET /krd/ HTTP/1.1" 200 2467
+INFO_2025-03-27 05:28:57,759_"GET /krd/operations HTTP/1.1" 200 3132
+INFO_2025-03-27 05:28:58,480_"GET /krd/operations/upload_product HTTP/1.1" 200 3852
+INFO_2025-03-27 05:29:41,513_C:\Users\rhashhanok\PycharmProjects\Logistics\Logistics\settings.py changed, reloading.

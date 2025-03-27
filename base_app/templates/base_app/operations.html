@@ -1,0 +1,16 @@
+{% extends 'base_app/home.html' %}
+{% load maintags %}
+
+
+{% block form %}
+    <div class="form_div">
+        <form class="operation_form" enctype="multipart/form-data" method="post"
+              action="{% create_url_name data=submenu.slug %}">
+            {% csrf_token %}
+            {{ form_contract }}
+            {{ form_file_upload }}
+            <input class="btn_open_file" id="submit_operation_load" type="submit" name="load_file_btn"
+                   value="Закачать">
+        </form>
+    </div>
+{% endblock %}

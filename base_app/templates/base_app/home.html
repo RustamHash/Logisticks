@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load maintags %}
+
+{% block filial_list %}
+    {% if user.is_superuser %}
+        <div id="basic_div_menu">
+            <div class="menu">
+                {% for filial in get_filials %}
+                    {% if filial_selected %}
+                        {% if filial_selected == filial.slug %}
+                            <span class="selected">{{ filial.name }}</span>
+                        {% else %}
+                            <span class="button_line"><a href={{ filial.get_home_url }}>{{ filial.name }}</a></span>
+                        {% endif %}
+                    {% else %}
+                        <span class="button_line"><a href={{ filial.get_home_url }}>{{ filial.name }}</a></span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+
+{% block menu %}
+    {% if menus %}
+        <div id="basic_div_menu">
+            <div class="menu">
+                {% for menu in menus %}
+                    {% if menu_selected == menu.slug %}
+                        <span class="selected">{{ menu.name }}</span>
+                    {% else %}
+                        <span class="button_line"><a
+                                href={% create_url_name data=menu.slug %}>{{ menu.name }}</a></span>
+                    {% endif %}
+
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block operation %}
+    {% if submenus %}
+        <div id="basic_div_menu">
+            <div class="menu">
+                {% for submenu in submenus %}
+                    {% if submenu_selected == submenu.slug %}
+                        <span class="selected">{{ submenu.name }}</span>
+                    {% else %}
+                        <span class="button_line"><a href={% create_url_name data=submenu.slug %}>{{ submenu.name }}</a></span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,88 @@
+{% load static %}
+{#{% load templatetags %}#}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'base/css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'base/css/base_home.css' %}">
+    <link rel="stylesheet" href="{% static 'base/css/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'base/css/forms.css' %}">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <title>SLEX</title>
+</head>
+<body>
+<div id="container_header">
+    <div id="menu_header">
+        <div class="menu-header-left">
+            <a href="/"><img src="{% static "base/images/slex-logo.png" %}" alt="SLEX"></a>
+        </div>
+        <div class="menu-header-center">
+            {% if filial_active %}
+                <h2><a href="{{ filial_active.get_home_url }}">{{ filial_active.name }}</a></h2>
+            {% else %}
+                <h2><a href="/">Главная</a></h2>
+            {% endif %}
+        </div>
+        <div class="menu-header-right">
+
+
+            {% if request.user.is_authenticated %}
+                {% if user.is_superuser %}
+                    <a href="/admin/">Сервис</a>
+                {% else %}
+                    <a href="{% url 'users:logout' %}">Выйти</a>
+                {% endif %}
+                {% if user.first_name or user.last_name %}
+                    <div>{{ user.get_full_name }}</div>
+                {% else %}
+                    <div>{{ user }}</div>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'users:login' %}">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% block filial_list %}
+    {% endblock %}
+    {% block menu %}
+    {% endblock %}
+    {% block operation %}
+    {% endblock %}
+    {% block form %}
+    {% endblock %}
+    {% block content %}
+    {% endblock %}
+
+    {% block show_result %}
+    {% endblock %}
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">
+                    {{ message|safe }}
+                    <a href="#" class="close">✖</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {#        <div id="header">#}
+    {#            <div class="basic-div">#}
+    {#                <div><label>#}
+    {#                    <textarea>{{ error_msg }}</textarea>#}
+    {#                </label></div>#}
+    {#            </div>#}
+    {#        </div>#}
+
+    {% block modals %}
+    {% endblock %}
+
+    {% block scripts %}
+    {% endblock %}
+</div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block filial_list %}
+    <div id="basic_div_menu">
+        <div class="menu">
+            {% for filial in get_filials %}
+                <span class="button_line"><a href={{ filial.get_home_url }}>{{ filial.name }}</a></span>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
