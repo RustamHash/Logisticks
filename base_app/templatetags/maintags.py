@@ -7,4 +7,5 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def create_url_name(context, data):
     data = f"{context['filial_selected']}:{data}"
+    # print(data)
     return reverse_lazy(data)

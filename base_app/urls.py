@@ -1,12 +1,13 @@
 from django.urls import path
 
-from base_app.views import (error_reverse_url, home, filial_home, operations, operation, process_orders)
+from base_app.views import (error_reverse_url, home, filial_home, operations, operation, report)
 from base_app.models import Filial, Menu, SubMenu
 
 dict_operations = {
-    'process_orders': process_orders,
+    'process_orders': operation,
     'upload_product': operation,
     'upload_clients': operation,
+    'billing_tls': report,
 }
 
 app_name = "base_app"

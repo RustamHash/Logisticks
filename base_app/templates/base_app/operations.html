@@ -6,6 +6,7 @@
     <div class="form_div">
         <form class="operation_form" enctype="multipart/form-data" method="post"
               action="{% create_url_name data=submenu.slug %}">
+            <label for="ftp" id="ftp_label">Загрузить на ftp<input type="checkbox" name="ftp" id="ftp" checked></label>
             {% csrf_token %}
             {{ form_contract }}
             {{ form_file_upload }}
@@ -13,4 +14,41 @@
                    value="Закачать">
         </form>
     </div>
+{% endblock %}
+
+
+{% if result %}
+    {% block show_result %}
+        {% for key, val in result.items %}
+            {{ key }}: {{ val }} <br>
+        {% endfor %}
+    {% endblock %}
+{% endif %}
+
+
+{% block scripts %}
+    <script>
+        $('#contract').change(function () {
+            get_contracts_id($(this).val())
+        });
+
+        function get_contracts_id(id_contract) {
+            $.ajax({
+                url: '/api/contracts/' + id_contract,
+                method: 'GET',
+                success: function (response) {
+                    if (response['ftp_bool']){
+                        $('#ftp_label').hide()
+                    } else {
+                        $('#ftp_label').show()
+                    }
+                    
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+    </script>
 {% endblock %}

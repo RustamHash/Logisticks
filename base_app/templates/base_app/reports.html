@@ -7,9 +7,19 @@
         <form class="operation_form" enctype="multipart/form-data" method="post"
               action="{% create_url_name data=submenu.slug %}">
             {% csrf_token %}
-            {{ form }}
+            {{ form_contract }}
+            {{ form_file_upload }}
             <input class="btn_open_file" id="submit_operation_load" type="submit" name="load_file_btn"
-                   value="Закачать">
+                   value="Сформировать">
         </form>
     </div>
 {% endblock %}
+
+
+{% if result %}
+    {% block show_result %}
+        {% for key, val in result.items %}
+            {{ key }}: {{ val }} <br>
+        {% endfor %}
+    {% endblock %}
+{% endif %}

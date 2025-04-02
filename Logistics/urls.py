@@ -24,5 +24,6 @@ urlpatterns = [
     path('krd/', include('krd.urls', namespace='krd')),
     path('rnd/', include('rnd.urls', namespace='rnd')),
     path('vlg/', include('vlg.urls', namespace='vlg')),
+    path('api/', include('api.urls', namespace='api')),
     path("__debug__/", include("debug_toolbar.urls")),
 ]

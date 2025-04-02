@@ -64,6 +64,7 @@ class Contracts(models.Model):
     id_sklad = models.IntegerField(default=0, verbose_name="Код склада", null=True, blank=True)
     id_agent = models.IntegerField(default=0, verbose_name="Код агента", null=True, blank=True)
     delivery_type = models.IntegerField(default=2, verbose_name="Тип доставки")
+    ftp_bool = models.BooleanField(default=False, verbose_name="Наличие ftp")
 
     def __str__(self):
         return self.name
@@ -84,7 +85,7 @@ class SubMenu(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, verbose_name="Наименование")
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='menu_submenu', verbose_name="Меню")
-    contract = models.ManyToManyField(Contracts, related_name='menu_filial', verbose_name="Филиал", null=True, blank=True)
+    contract = models.ManyToManyField(Contracts, related_name='menu_filial', verbose_name="Филиал")
     slug = models.SlugField(max_length=255, verbose_name="URL")
     position = models.IntegerField(default=0, verbose_name="Позиция в меню")
     as_active = models.BooleanField(default=True, verbose_name="Признак активности")

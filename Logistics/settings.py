@@ -43,12 +43,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     "debug_toolbar",
+    "corsheaders",
     "users.apps.UsersConfig",
     "krd.apps.KrdConfig",
     "base_app.apps.BaseAppConfig",
     "rnd.apps.RndConfig",
     "vlg.apps.VlgConfig",
     "api.apps.ApiConfig",
+    "ut.apps.UtConfig",
+    "pg.apps.PgConfig"
 ]
 
 MIDDLEWARE = [
@@ -60,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'Logistics.urls'
@@ -135,6 +139,45 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     ),
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+#         'rest_framework.authentication.SessionAuthentication',
+#         'rest_framework.authentication.BasicAuthentication',
+#     )
+# }
+
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSESS': 'rest_framework.permissions.AllowAny',
+#     'DEFAULT_RENDERER_CLASSES': [
+#         'rest_framework.renderers.JSONRenderer',
+#     ],
+#     'DEFAULT_PARSER_CLASSES': [
+#         'rest_framework.parsers.JSONParser',
+#         'rest_framework.parsers.FormParser',
+#         'rest_framework.parsers.MultiPartParser'
+#     ]
+# }
+
+# React's Port : 3000
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:5050',
+#     'http://127.0.0.1:5050',
+# ]
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+# CORS_ALLOW_HEADERS = (
+#         'x-requested-with',
+#         'content-type',
+#         'accept',
+#         'origin',
+# )
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -172,14 +215,15 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console', 'file_error'],
+            'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },
-        'base_app': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
+        'root': {
+            'handlers': ['file_info', 'file_error'],
+            'level': 'DEBUG',
             'propagate': True,
-        }
+        },
+
     },
 }

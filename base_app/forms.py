@@ -2,12 +2,9 @@ from django import forms
 from django.forms import SelectDateWidget
 import datetime
 from dateutil.relativedelta import relativedelta
+from django.shortcuts import get_object_or_404
 
 from base_app.models import Contracts
-
-
-# class DateInput(forms.DateInput):
-#     input_type = 'date'
 
 
 class PeriodForm(forms.Form):
@@ -27,19 +24,9 @@ class ContractEditForm(forms.ModelForm):
         model = Contracts
         exclude = ('name', 'slug',)
 
-    # def __init__(self, filial_slug=None, **kwargs):
-    #     super(ContractEditForm, self).__init__(**kwargs)
-    #     if filial_slug:
-    #         self.fields['filial'].queryset = Contracts.objects.filter(filial__slug=filial_slug)
-
 
 class ReportFiltersDateForm(forms.Form):
     today = datetime.date.today()
-    # def __init__(self, *args, **kwargs):
-    #     super(ReportFiltersDateForm, self).__init__(*args, **kwargs)
-    #     today = datetime.date.today()
-    #     self.first_day = today.replace(day=1) - relativedelta(months=1)
-    #     self.last_day = today.replace(day=1) - datetime.timedelta(days=1)
     start_date = forms.DateField(input_formats='%Y,%m,%d', widget=SelectDateWidget(),
                                  label='Start Date',
                                  initial=today.replace(day=1) - relativedelta(months=1)
@@ -65,15 +52,9 @@ class ContractsForm(forms.Form):
     def __init__(self, submenu, **kwargs):
         super(ContractsForm, self).__init__(**kwargs)
         self.fields['contract'].widget.attrs['class'] = 'inp_open_file'
-        # self.fields['file'].widget.attrs['class'] = 'inp_open_file'
-        # self.fields['file'].widget.attrs['accept'] = '.xls,.xlsx'
+        self.fields['contract'].widget.attrs['id'] = 'contract'
         self.fields['contract'].queryset = submenu
-
     contract = forms.ModelChoiceField(
-        queryset=Contracts.objects.all(),
+        queryset=Contracts.objects.all().order_by('name').values_list('slug', 'name'),
         label=False,
-        # help_text='Выберите контракт'
     )
-    # file = forms.FileField(
-    #     label=False
-    # )

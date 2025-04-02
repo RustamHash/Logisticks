@@ -1,84 +1,179 @@
+import inspect
+import traceback
+
 from django.shortcuts import render
 from django.contrib import messages
 
-from .models import Filial, Menu, SubMenu, Contracts
-from base_app.forms import ContractsForm, FileUploadForm, ReportFiltersDateForm, PeriodForm
-import logging
+from base_app.models import Filial, Menu, SubMenu, Contracts
 
-logger = logging.getLogger(__name__)
+from base_app.forms import ContractsForm, FileUploadForm, ReportFiltersDateForm, PeriodForm
+from base_app.utils import Logger
+
+from base_app.contract_models.krd import kzvs
+from base_app.contract_models import zelandiya
+
+
+
+dict_contract_func = {
+    'kzvs': kzvs,
+    'zelandiya_krd': zelandiya,
+}
 
 
 def home(request, **kwargs):
-    logger.error('Start home')
-    kwargs['filials'] = Filial.objects.filter(as_active=True)
-    kwargs['filial_active'] = None
-    return render(request, 'base_app/filials.html', kwargs)
+    # from ut.models import Agent
+    # Agent.objects.all().delete()
+    func_name = inspect.currentframe().f_code.co_name
+    try:
+        kwargs['filials'] = Filial.objects.filter(as_active=True)
+        kwargs['filial_active'] = None
+        Logger(module_name=__name__, func_name=func_name).info()
+        return render(request, 'base_app/filials.html', kwargs)
+    except Exception as e:
+        Logger(
+            module_name=__name__,
+            func_name=func_name,
+            message_error=str(e),
+            traceback=traceback.format_exc()
+        ).error()
 
 
 def filial_home(request, **kwargs):
-    logger.error('Start filial_home')
-    kwargs['filial'] = Filial.objects.filter(as_active=True, slug=kwargs['filial_selected'])
-    kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    return render(request, 'base_app/home.html', context=kwargs)
+    func_name = inspect.currentframe().f_code.co_name
+    try:
+        kwargs['filial'] = Filial.objects.filter(as_active=True, slug=kwargs['filial_selected'])
+        kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
+        Logger(module_name=__name__, func_name=func_name).info()
+        return render(request, 'base_app/home.html', context=kwargs)
+    except Exception as e:
+        Logger(
+            module_name=__name__,
+            func_name=func_name,
+            message_error=str(e),
+            traceback=traceback.format_exc()
+        ).error()
 
 
 def operations(request, **kwargs):
-    logger.error('Start operations')
-    kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
-    return render(request, 'base_app/home.html', context=kwargs)
-
-
-def process_orders(request, **kwargs):
-    logger.error('Start process_orders')
-    kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
-    kwargs['submenu'] = SubMenu.objects.get(slug=kwargs['submenu_selected'])
-    kwargs['contracts'] = kwargs['submenu'].contract.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    kwargs['form_contract'] = ContractsForm(submenu=kwargs['contracts'])
-    kwargs['form_file_upload'] = FileUploadForm()
-    if request.method == 'POST':
-        contract = Contracts.objects.get(pk=request.POST['contract'])
-        print(contract)
-        print(request.POST)
-        start_date = request.POST['start_date']
-        print(start_date)
-        print(type(start_date))
-        if request.FILES.get('file'):
-            print(request.FILES['file'])
-    return render(request, 'base_app/operations.html', context=kwargs)
+    func_name = inspect.currentframe().f_code.co_name
+    try:
+        kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
+        kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
+        return render(request, 'base_app/home.html', context=kwargs)
+    except Exception as e:
+        Logger(
+            module_name=__name__,
+            func_name=func_name,
+            message_error=str(e),
+            traceback=traceback.format_exc()
+        ).error()
 
 
 def operation(request, **kwargs):
-    logger.error('Start operation')
-    kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
-    kwargs['submenu'] = SubMenu.objects.get(slug=kwargs['submenu_selected'])
-    kwargs['contracts'] = kwargs['submenu'].contract.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    kwargs['form_date'] = PeriodForm()
-    kwargs['form_contract'] = ContractsForm(submenu=kwargs['contracts'])
-    kwargs['form_file_upload'] = FileUploadForm()
-    # kwargs['form'] = ContractsForm(filial_slug=kwargs['filial_selected'])
-    # if request.method == 'POST':
-    #     print(request.POST)
-    #     if request.FILES.get('file'):
-    #         print(request.FILES['file'])
-    return render(request, 'base_app/operations.html', context=kwargs)
+    func_name = inspect.currentframe().f_code.co_name
+    try:
+        kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
+        kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
+        kwargs['submenu'] = SubMenu.objects.get(slug=kwargs['submenu_selected'])
+        kwargs['contracts'] = kwargs['submenu'].contract.filter(as_active=True,
+                                                                filial__slug=kwargs['filial_selected']).order_by('name')
+        kwargs['form_contract'] = ContractsForm(submenu=kwargs['contracts'])
+        kwargs['form_file_upload'] = FileUploadForm()
+        if request.method == 'POST':
+            contract = Contracts.objects.get(pk=request.POST['contract'])
+            contract_func = dict_contract_func.get(contract.slug, None)
+            if not contract_func:
+                messages.error(request, f'Не создана обработка для: {contract.slug} {contract.name}')
+                return render(request, 'base_app/operations.html', context=kwargs)
+            file = request.FILES['file']
+            if request.POST.get('ftp') and contract.ftp_bool:
+                ftp = True
+            else:
+                ftp = False
+            data = {
+                'file_name': file,
+                'contract': contract,
+                'submenu_selected': kwargs['submenu_selected'],
+                'ftp': ftp
+            }
+            kwargs['result'] = contract_func.start(**data)
+        Logger(module_name=__name__, func_name=func_name).info()
+        return render(request, 'base_app/operations.html', context=kwargs)
+    except Exception as e:
+        Logger(
+            module_name=__name__,
+            func_name=func_name,
+            message_error=str(e),
+            traceback=traceback.format_exc()
+        ).error()
+        return render(request, 'base_app/home.html', context=kwargs)
+
+
+def report(request, **kwargs):
+    print(kwargs)
+    func_name = inspect.currentframe().f_code.co_name
+    try:
+        kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
+        kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
+        kwargs['submenu'] = SubMenu.objects.get(slug=kwargs['submenu_selected'])
+        kwargs['contracts'] = kwargs['submenu'].contract.filter(as_active=True,
+                                                                filial__slug=kwargs['filial_selected']).order_by('name')
+        kwargs['form_contract'] = ContractsForm(submenu=kwargs['contracts'])
+        kwargs['form_file_upload'] = PeriodForm()
+        if request.method == 'POST':
+            print(request.POST)
+            contract = Contracts.objects.get(pk=request.POST['contract'])
+            contract_func = dict_contract_func.get(contract.slug, None)
+            if not contract_func:
+                messages.error(request, f'Не создана обработка для: {contract.slug} {contract.name}')
+                return render(request, 'base_app/reports.html', context=kwargs)
+            data = {
+                'contract': contract,
+                'submenu_selected': kwargs['submenu_selected'],
+                'start_date': request.POST['start_date'],
+                'end_date': request.POST['end_date']
+            }
+            kwargs['result'] = contract_func.start(**data)
+        Logger(module_name=__name__, func_name=func_name).info()
+        return render(request, 'base_app/reports.html', context=kwargs)
+    except Exception as e:
+        Logger(
+            module_name=__name__,
+            func_name=func_name,
+            message_error=str(e),
+            traceback=traceback.format_exc()
+        ).error()
+        return render(request, 'base_app/home.html', context=kwargs)
 
 
 def error_reverse_url(request, **kwargs):
-    logger.error('Start error_reverse_url')
-    logger.error(kwargs)
-    logger.error(f'Не указан путь для: {kwargs["submenu_selected"]}')
-    kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
-    messages.error(request, f'Не указан путь для {kwargs["submenu_selected"]}')
-    return render(request, 'base_app/home.html', context=kwargs)
+    func_name = inspect.currentframe().f_code.co_name
+    try:
+        kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
+        kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
+        messages.error(request, f'Не указан путь для {kwargs["submenu_selected"]}')
+        Logger(module_name=__name__, func_name=func_name).info()
+        return render(request, 'base_app/home.html', context=kwargs)
+    except Exception as e:
+        Logger(
+            module_name=__name__,
+            func_name=func_name,
+            message_error=str(e),
+            traceback=traceback.format_exc()
+        ).error()
 
 
 def billing_tls(request, **kwargs):
-    logger.error('Start billing_tls')
-    kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
-    kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
-    print(kwargs)
-    return render(request, 'base_app/reports.html', context=kwargs)
+    func_name = inspect.currentframe().f_code.co_name
+    try:
+        kwargs['menus'] = Menu.objects.filter(as_active=True, filial__slug=kwargs['filial_selected'])
+        kwargs['submenus'] = SubMenu.objects.filter(menu__slug=kwargs['menu_selected'])
+        Logger(module_name=__name__, func_name=func_name).info()
+        return render(request, 'base_app/reports.html', context=kwargs)
+    except Exception as e:
+        Logger(
+            module_name=__name__,
+            func_name=func_name,
+            message_error=str(e),
+            traceback=traceback.format_exc()
+        ).error()

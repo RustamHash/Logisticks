@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.forms import TextInput
+from django.db import models
+
 from .models import Filial, Menu, SubMenu, Contracts
 
 
@@ -36,6 +39,10 @@ class ContractsAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'filial')
     prepopulated_fields = {'slug': ('name',)}
     ordering = ['filial', 'name']
+    formfield_overrides = {
+        models.IntegerField: {'widget': TextInput(attrs={'size': '20'})},
+        models.CharField: {'widget': TextInput(attrs={'size': '100'})},
+    }
 
     class Meta:
         model = Contracts
